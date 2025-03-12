@@ -1,14 +1,23 @@
 import { NextResponse } from "next/server"
+import { cookies } from "next/headers"
 
 export async function POST() {
     try {
-        // In a real application, you would invalidate the session here
-        // For simplicity, we're just returning a success response
+        // Clear the token cookie
+        const response = NextResponse.json({ message: "Logged out successfully" }, { status: 200 })
+        response.cookies.set({
+            name: "token",
+            value: "",
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            path: "/",
+            maxAge: 0, // Expire immediately
+        })
 
-        return NextResponse.json({ message: "Logged out successfully" }, { status: 200 })
+        return response
     } catch (error) {
         console.error("Logout error:", error)
         return NextResponse.json({ message: "Internal server error" }, { status: 500 })
     }
 }
-

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { useDispatch } from "react-redux"
@@ -14,7 +14,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, Loader2 } from "lucide-react"
-import { setUser } from "../../../lib/features/auth/authSlice"
+import { setUser } from "@/lib/features/auth/authSlice"
 
 const formSchema = z.object({
     email: z.string().email({
@@ -27,6 +27,8 @@ const formSchema = z.object({
 
 export default function LoginPage() {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
     const dispatch = useDispatch()
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -67,8 +69,8 @@ export default function LoginPage() {
                 }),
             )
 
-            // Redirect to dashboard
-            router.push("/dashboard")
+            // Redirect to callback URL or dashboard
+            router.push(callbackUrl)
         } catch (err) {
             setError(err instanceof Error ? err.message : "Invalid email or password")
         } finally {

@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
 import { compare } from "bcrypt"
-import { prisma } from "../../../../../lib/prisma"
+import { prisma } from "@/lib/prisma"
 import { z } from "zod"
+import { signJwtToken } from "@/lib/jwt"
+import { cookies } from "next/headers"
 
 const loginSchema = z.object({
     email: z.string().email(),
@@ -35,19 +37,27 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: "Invalid email or password" }, { status: 401 })
         }
 
-        // Create session (you might want to use a proper session management library)
-        // For simplicity, we're just returning the user data
+        // Generate JWT token
+        // Generate JWT token
+        const token = signJwtToken({
+            userId: user.id,
+            email: user.email,
+            name: user.name,
+        })
 
+        // Set cookie with the token
+        const cookieValue = `token=${token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${60 * 60 * 24 * 7}`
         return NextResponse.json(
             {
-                message: "Login successful",
-                user: {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
+                message: "User registered successfully",
+                user,
+            },
+            {
+                status: 201,
+                headers: {
+                    'Set-Cookie': cookieValue,
                 },
             },
-            { status: 200 },
         )
     } catch (error) {
         console.error("Login error:", error)

@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
 import { hash } from "bcrypt"
-import { prisma } from "../../../../../lib/prisma"
+import { prisma } from "@/lib/prisma"
 import { z } from "zod"
+import { signJwtToken } from "@/lib/jwt"
+import { cookies } from "next/headers"
 
 const userSchema = z.object({
     name: z.string().min(2),
@@ -47,15 +49,26 @@ export async function POST(req: Request) {
             },
         })
 
-        // Create session (you might want to use a proper session management library)
-        // For simplicity, we're just returning the user data
+        // Generate JWT token
+        const token = signJwtToken({
+            userId: user.id,
+            email: user.email,
+            name: user.name,
+        })
 
+        // Set cookie with the token
+        const cookieValue = `token=${token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${60 * 60 * 24 * 7}`
         return NextResponse.json(
             {
                 message: "User registered successfully",
                 user,
             },
-            { status: 201 },
+            {
+                status: 201,
+                headers: {
+                    'Set-Cookie': cookieValue,
+                },
+            },
         )
     } catch (error) {
         console.error("Registration error:", error)

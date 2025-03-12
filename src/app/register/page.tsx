@@ -14,7 +14,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, Loader2 } from "lucide-react"
-import { setUser } from "../../../lib/features/auth/authSlice"
+import { setUser } from "../../lib/features/auth/authSlice"
 
 const formSchema = z.object({
     name: z.string().min(2, {
